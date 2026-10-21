@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "id": "renuo.rclone",
+  "name": "rclone",
+  "version": "1.0.0",
+  "author": "Renuo AG",
+  "license": "MIT",
+  "description": "Pending uploads and health of your rclone mounts in the Omarchy bar.",
+  "kinds": [
+    "service",
+    "bar-widget"
+  ],
+  "entryPoints": {
+    "service": "Service.qml",
+    "barWidget": "BarWidget.qml"
+  },
+  "barWidget": {
+    "displayName": "rclone",
+    "description": "Every running rclone mount: up to date, uploading, or not responding.",
+    "category": "Files",
+    "allowMultiple": false,
+    "defaultSection": "right"
+  }
+}

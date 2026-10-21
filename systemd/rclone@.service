@@ -1,0 +1,21 @@
+[Unit]
+Description=rclone mount of %i: at ~/Cloud/%i
+Documentation=https://rclone.org/commands/rclone_mount/
+
+[Service]
+Type=notify
+# A crashed run leaves a dead FUSE mount that fails mkdir with "Transport endpoint is not connected".
+ExecStartPre=-/usr/bin/fusermount3 -uz %h/Cloud/%i
+ExecStartPre=/usr/bin/mkdir -p %h/Cloud/%i %t/rclone
+# rclone refuses to listen on a socket file a crashed run left behind.
+ExecStartPre=/usr/bin/rm -f %t/rclone/%i.sock
+ExecStart=/usr/bin/rclone mount %i: %h/Cloud/%i \
+  --vfs-cache-mode full \
+  --vfs-cache-max-size 20G \
+  --rc \
+  --rc-addr unix://%t/rclone/%i.sock
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=default.target

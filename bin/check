@@ -1,0 +1,23 @@
+#!/bin/bash
+
+set -euo pipefail
+
+cd "$(dirname "${BASH_SOURCE[0]}")/.."
+
+if command -v omarchy-plugin-validate >/dev/null 2>&1; then
+  omarchy-plugin-validate .
+fi
+
+# verify needs an instance name, which a template file does not have.
+unit_dir=$(mktemp -d)
+trap 'rm -rf "$unit_dir"' EXIT
+cp systemd/rclone@.service "$unit_dir/rclone@check.service"
+systemd-analyze verify --user --man=no "$unit_dir/rclone@check.service"
+
+node --test \
+  --experimental-test-coverage \
+  --test-coverage-include='Model.js' \
+  --test-coverage-lines=100 \
+  test/*.test.js
+
+bats test/

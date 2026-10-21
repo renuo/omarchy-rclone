@@ -1,0 +1,14 @@
+#!/bin/bash
+
+# Answers `rclone rc --unix-socket <socket> vfs/stats` with
+# $FAKE_RCLONE_ANSWERS/<socket name>.json. A socket without a staged answer
+# fails the way rclone does when nothing listens on it.
+
+echo "$*" >>"$FAKE_RCLONE_ARGS"
+
+answer="$FAKE_RCLONE_ANSWERS/$(basename "$3" .sock).json"
+if [[ ! -f $answer ]]; then
+  echo "Failed to rc: connection failed: dial unix $3: connect: connection refused" >&2
+  exit 1
+fi
+cat "$answer"

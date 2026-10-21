@@ -1,0 +1,7 @@
+{
+  "tooltip.none": "No rclone mounts running",
+  "tooltip.line": "%1: %2",
+  "status.idle": "Up to date",
+  "status.uploading": { "one": "Uploading %1 file", "other": "Uploading %1 files" },
+  "status.unreachable": "Not responding"
+}
