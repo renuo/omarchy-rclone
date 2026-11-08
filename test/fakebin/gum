@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# input prints the next line of $FAKE_GUM_INPUTS; confirm answers with
+# $FAKE_GUM_CONFIRM (yes unless it is "no").
+
+echo "$*" >>"$FAKE_GUM_ARGS"
+
+case $1 in
+input)
+  count=$(grep -c '^input' "$FAKE_GUM_ARGS")
+  sed -n "${count}p" "$FAKE_GUM_INPUTS"
+  ;;
+confirm)
+  [[ ${FAKE_GUM_CONFIRM:-yes} != no ]]
+  ;;
+esac
