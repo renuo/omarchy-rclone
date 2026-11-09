@@ -5,18 +5,18 @@
   "version": "1.0.0",
   "author": "Renuo AG",
   "license": "MIT",
-  "description": "Pending uploads and health of your rclone mounts in the Omarchy bar.",
+  "description": "Your rclone mounts in the Omarchy bar: pending uploads, health, and setting up Google Drive and OneDrive.",
   "kinds": [
     "service",
     "bar-widget"
   ],
   "entryPoints": {
     "service": "Service.qml",
-    "barWidget": "BarWidget.qml"
+    "barWidget": "Panel.qml"
   },
   "barWidget": {
     "displayName": "rclone",
-    "description": "Every running rclone mount: up to date, uploading, or not responding.",
+    "description": "Every rclone mount: up to date, uploading, or not responding. Click to mount, set up and log in.",
     "category": "Files",
     "allowMultiple": false,
     "defaultSection": "right"

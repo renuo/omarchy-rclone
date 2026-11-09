@@ -4,14 +4,16 @@ Documentation=https://rclone.org/commands/rclone_mount/
 
 [Service]
 Type=notify
+# Defaults as variables rather than flags: rclone lets a flag win over its
+# RCLONE_* variable, which would make them impossible to change in a drop-in.
+Environment=RCLONE_VFS_CACHE_MODE=full
+Environment=RCLONE_VFS_CACHE_MAX_SIZE=20G
 # A crashed run leaves a dead FUSE mount that fails mkdir with "Transport endpoint is not connected".
 ExecStartPre=-/usr/bin/fusermount3 -uz %h/Cloud/%i
 ExecStartPre=/usr/bin/mkdir -p %h/Cloud/%i %t/rclone
 # rclone refuses to listen on a socket file a crashed run left behind.
 ExecStartPre=/usr/bin/rm -f %t/rclone/%i.sock
 ExecStart=/usr/bin/rclone mount %i: %h/Cloud/%i \
-  --vfs-cache-mode full \
-  --vfs-cache-max-size 20G \
   --rc \
   --rc-addr unix://%t/rclone/%i.sock
 Restart=on-failure

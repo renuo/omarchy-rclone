@@ -1,14 +1,30 @@
 #!/bin/bash
 
-# Answers `rclone rc --unix-socket <socket> vfs/stats` with
-# $FAKE_RCLONE_ANSWERS/<socket name>.json. A socket without a staged answer
+# `rclone rc --unix-socket <socket> vfs/stats` answers with
+# $FAKE_RCLONE_ANSWERS/<socket name>.json; a socket without a staged answer
 # fails the way rclone does when nothing listens on it.
+# `rclone config dump` prints $FAKE_RCLONE_DUMP, and `config create` replaces
+# it with $FAKE_RCLONE_CREATED when that is set. Both `config create|update`
+# print a stand-in token like rclone does. Every other call is only recorded.
 
 echo "$*" >>"$FAKE_RCLONE_ARGS"
 
-answer="$FAKE_RCLONE_ANSWERS/$(basename "$3" .sock).json"
-if [[ ! -f $answer ]]; then
-  echo "Failed to rc: connection failed: dial unix $3: connect: connection refused" >&2
-  exit 1
-fi
-cat "$answer"
+case "$1 ${2:-}" in
+"rc --unix-socket")
+  answer="$FAKE_RCLONE_ANSWERS/$(basename "$3" .sock).json"
+  if [[ ! -f $answer ]]; then
+    echo "Failed to rc: connection failed: dial unix $3: connect: connection refused" >&2
+    exit 1
+  fi
+  cat "$answer"
+  ;;
+"config dump")
+  [[ -s ${FAKE_RCLONE_DUMP_FILE:-} ]] && exec cat "$FAKE_RCLONE_DUMP_FILE"
+  [[ -n ${FAKE_RCLONE_DUMP:-} ]] || exit 1
+  printf '%s' "$FAKE_RCLONE_DUMP"
+  ;;
+"config create" | "config update")
+  [[ $2 == create && -n ${FAKE_RCLONE_CREATED:-} ]] && printf '%s' "$FAKE_RCLONE_CREATED" >"$FAKE_RCLONE_DUMP_FILE"
+  echo "token = SECRET-TOKEN"
+  ;;
+esac

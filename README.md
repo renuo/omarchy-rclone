@@ -9,9 +9,9 @@ Your rclone mounts in the Omarchy bar.
 | Crossed-out cloud, urgent colour | A mount stopped answering |
 | Dimmed cloud | Nothing is mounted |
 
-Hover to see each mount. Click to open `~/Cloud` in Nautilus. Right-click to refresh.
+Hover to see each mount. Click for the panel, middle-click to open `~/Cloud` in Nautilus, right-click to refresh.
 
-The plugin only watches; rclone does the work. Each mount is a `rclone mount` run by the systemd user unit [`systemd/rclone@.service`](systemd/rclone@.service), which also opens rclone's remote control on `$XDG_RUNTIME_DIR/rclone/<remote>.sock`. The plugin finds mounts there and asks each one for `vfs/stats`, which rclone answers without credentials.
+The plugin only watches and guides; rclone does the work. Each mount is a `rclone mount` run by the systemd user unit [`systemd/rclone@.service`](systemd/rclone@.service), which also opens rclone's remote control on `$XDG_RUNTIME_DIR/rclone/<remote>.sock`. The plugin finds mounts there and asks each one for `vfs/stats`, which rclone answers without credentials.
 
 ## Install
 
@@ -21,24 +21,27 @@ bin/install
 
 This installs rclone, copies the mount unit to `~/.config/systemd/user/`, copies the plugin to `~/.config/omarchy/plugins/renuo.rclone/` and puts it in the bar.
 
-## Mount a remote
+## Set up a remote
 
-Any rclone backend works. Create the remote with rclone and start its mount under the same name, for example Google Drive and OneDrive:
+The panel has a card for every rclone remote, and a guide for `gdrive` (Google Drive) and `onedrive` (OneDrive) while they are missing. Whatever needs typing runs in Omarchy's floating terminal through [`ctl.sh`](ctl.sh):
 
-```bash
-rclone config create gdrive drive
-rclone config create onedrive onedrive
-systemctl --user enable --now rclone@gdrive rclone@onedrive
-```
+- **Google Drive** needs an OAuth client of your own, since rclone's shared one is being retired during 2026. The guide opens the Google Cloud console's credentials page; copy the ID and secret of a "Desktop app" client. Once `gdrive` exists, its card names the Google Cloud project the client belongs to and links its credentials and its publishing status. Keep that status "In production": while it is "Testing", Google ends the login after 7 days. A new Drive remote is pointed at the same project.
+- **OneDrive** works with rclone's own client. Log in with the Microsoft account, and rclone connects that account's own drive. A work account may need an admin to approve rclone first. For a SharePoint library, use *rclone config* at the bottom of the panel.
 
-Each `config create` opens the browser to log in. Use plain `rclone config` for backends with more questions, for instance a OneDrive account with several drives. Keep remote names to letters, digits, `_`, `-` and `.`, since the name is also the systemd instance.
+Then switch on the card's mount. That enables `rclone@<remote>`, so it mounts again after every login. *Log in again* renews an expired login.
 
-The remote is mounted at `~/Cloud/<remote>` with a full VFS cache capped at 20G. Every rclone flag can also be set as an `RCLONE_*` environment variable, so you can change one remote with `systemctl --user edit rclone@gdrive`:
+Any other backend works too: create it with *rclone config* and it gets a card. Keep remote names to letters, digits, `_`, `-` and `.`, since the name is also the systemd instance.
+
+### Mount settings
+
+A remote is mounted at `~/Cloud/<remote>` with a full VFS cache capped at 20G. *Mount settings* opens `~/.config/systemd/user/rclone@<remote>.service.d/override.conf` in your editor, started from [a commented template](templates/mount-override.conf). Every rclone flag can be set there as an `RCLONE_*` variable:
 
 ```ini
 [Service]
 Environment=RCLONE_VFS_CACHE_MAX_SIZE=50G
 ```
+
+After the editor closes, systemd reloads, and a running mount restarts if you agree; uploads in progress then start over.
 
 ## Using the mount in Nautilus
 
